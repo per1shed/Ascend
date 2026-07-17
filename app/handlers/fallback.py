@@ -48,6 +48,9 @@ async def delete_pin_service_message(message: Message) -> None:
 async def unexpected_message(message: Message) -> None:
     if message.from_user is None or message.from_user.is_bot:
         return
+    # команды обрабатывают другие хендлеры; не перехватываем
+    if message.text and message.text.startswith("/"):
+        return
 
     try:
         await message.delete()

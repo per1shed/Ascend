@@ -42,9 +42,28 @@ class DayScreenService:
         answer_callback: bool = True,
         force_new: bool = False,
     ) -> int | None:
-        """Показать/обновить экран дня. Возвращает message_id героя."""
+        """Показать/обновить экран дня. Возвращает message_id героя.
+
+        Callback — edit на месте.
+        Команда (/today, /start) — новый экран внизу чата (старый удаляется),
+        иначе пользователь не видит реакции.
+        """
         resolved_bot, resolved_chat = self._resolve_bot_chat(target, bot, chat_id)
         settings = await self._get_settings(user)
+
+        # Сообщение-команда: всегда поднимаем экран вниз
+        if isinstance(target, Message):
+            force_new = True
+
+        if force_new and settings.day_screen_message_id:
+            try:
+                await resolved_bot.delete_message(
+                    resolved_chat, settings.day_screen_message_id
+                )
+            except TelegramAPIError:
+                pass
+            settings.day_screen_message_id = None
+            await self.session.flush()
 
         if isinstance(target, CallbackQuery) and target.message:
             msg = target.message
