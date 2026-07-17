@@ -65,7 +65,11 @@ class DayScreenService:
             settings.day_screen_message_id = None
             await self.session.flush()
 
-        if isinstance(target, CallbackQuery) and target.message:
+        if (
+            not force_new
+            and isinstance(target, CallbackQuery)
+            and target.message
+        ):
             msg = target.message
             if msg.photo or msg.document or (msg.caption and not msg.text):
                 try:

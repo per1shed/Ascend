@@ -105,4 +105,4 @@ async def admin_today(
         await callback.message.delete()
     except Exception:
         pass
-    await send_today(callback, db_user, session)
+    await send_today(callback, db_user, session, force_new=True)

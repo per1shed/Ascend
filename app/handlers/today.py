@@ -210,6 +210,7 @@ async def send_today(
     skip_onboarding: bool = False,
     pulse_line: str | None = None,
     recovery_line: str | None = None,
+    force_new: bool = False,
 ) -> None:
     if not skip_onboarding and await OnboardingService(session).should_show(db_user):
         await send_onboarding(target, answer_callback=answer_callback)
@@ -233,6 +234,7 @@ async def send_today(
         kb,
         target=target,
         answer_callback=answer_callback,
+        force_new=force_new,
     )
 
 
