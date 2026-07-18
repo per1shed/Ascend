@@ -8,6 +8,38 @@ from app.services import ReportService
 router = Router(name="evening")
 
 
+@router.callback_query(F.data.startswith("push:ack:"))
+async def push_ack(
+    callback: CallbackQuery, db_user: User, session: AsyncSession
+) -> None:
+    """Убрать пуш и вернуть к экрану дня."""
+    from app.handlers.today import send_today
+
+    kind = (callback.data or "").rsplit(":", 1)[-1]
+
+    if kind == "evening":
+        await ReportService(session).save_evening_report(
+            db_user,
+            mood=4,
+            skipped=False,
+        )
+
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+
+    await callback.answer()
+    await send_today(
+        callback,
+        db_user,
+        session,
+        answer_callback=False,
+        force_new=True,
+    )
+
+
+# старые кнопки Ок / Пропустить — та же логика
 @router.callback_query(F.data == "evening:ok")
 @router.callback_query(F.data == "evening:skip")
 async def evening_finish(
@@ -21,4 +53,15 @@ async def evening_finish(
         mood=4 if not skipped else None,
         skipped=skipped,
     )
-    await send_today(callback, db_user, session)
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+    await callback.answer()
+    await send_today(
+        callback,
+        db_user,
+        session,
+        answer_callback=False,
+        force_new=True,
+    )

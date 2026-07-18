@@ -16,7 +16,6 @@ from app.repositories import UserRepository
 from app.scheduler.backup import cleanup_old_backups, create_backup
 from app.scheduler.logs_cleanup import cleanup_logs
 from app.services import (
-    DayScreenService,
     HabitService,
     NewYearService,
     RecoveryService,
@@ -139,29 +138,27 @@ class SchedulerService:
                 logger.info("morning_skipped_complete", user_id=user_id)
                 return
 
-            recovery_line = None
-            if await RecoveryService(session).should_offer_recovery(user):
-                recovery_line = RecoveryService(session).morning_line()
+            from app.keyboards import push_ack_kb
+            from app.utils.datetime_utils import today
+            from app.utils.push_copy import morning_push_text
 
-            from app.handlers.today import build_today_text
-            from app.keyboards import today_screen_kb
-
-            text, habits, is_rest = await build_today_text(
-                user, session, recovery_line=recovery_line
+            recovery = await RecoveryService(session).should_offer_recovery(user)
+            text = morning_push_text(
+                user_id=user.id,
+                is_rest=is_rest,
+                recovery=recovery,
+                day_key=str(today()),
             )
-            kb = today_screen_kb(habits, is_rest=is_rest)
-            await DayScreenService(session).deliver(
-                user,
+            await self.bot.send_message(
+                telegram_id,
                 text,
-                kb,
-                bot=self.bot,
-                chat_id=telegram_id,
+                reply_markup=push_ack_kb("morning"),
             )
             await session.commit()
             logger.info(
                 "morning_sent",
                 user_id=user_id,
-                recovery=bool(recovery_line),
+                recovery=recovery,
                 is_rest=is_rest,
             )
 
@@ -174,27 +171,22 @@ class SchedulerService:
                 await session.commit()
                 return
 
-            from app.keyboards import evening_ok_kb
-            from app.utils.datetime_utils import days_until_january_1, days_word
+            from app.keyboards import push_ack_kb
+            from app.utils.datetime_utils import today
+            from app.utils.push_copy import evening_push_text
 
             habit_service = HabitService(session)
             await habit_service.ensure_core_habits(user)
             habits = await habit_service.today_status(user)
-            left = days_until_january_1()
-            lines = [
-                "☾",
-                f"До 1 января: {left} {days_word(left)}",
-                "",
-            ]
-            for item in habits:
-                mark = "✓" if item["done"] else "○"
-                lines.append(f"{mark}  {item['habit'].name}")
-            lines.append("")
-            lines.append("Ок?")
+            text = evening_push_text(
+                user_id=user.id,
+                habits=habits,
+                day_key=str(today()),
+            )
             await self.bot.send_message(
                 telegram_id,
-                "\n".join(lines),
-                reply_markup=evening_ok_kb(),
+                text,
+                reply_markup=push_ack_kb("evening"),
             )
             await session.commit()
         logger.info("evening_prompt_sent", user_id=user_id)

@@ -160,3 +160,39 @@ def test_feedback_tiers():
     )
     assert unmark.tier == FeedbackTier.UNMARK
     assert unmark.toast == "Снято"
+
+
+def test_morning_push_text():
+    from app.utils.constants import BRAND
+    from app.utils.push_copy import morning_push_text
+
+    text = morning_push_text(
+        user_id=1, is_rest=False, recovery=False, day_key="2026-07-18"
+    )
+    assert BRAND in text
+    assert "1 января" in text
+    assert "Срыв был" not in text
+
+    recovery = morning_push_text(
+        user_id=1, is_rest=False, recovery=True, day_key="2026-07-18"
+    )
+    assert "Срыв был" in recovery
+
+    rest = morning_push_text(
+        user_id=1, is_rest=True, recovery=True, day_key="2026-07-18"
+    )
+    assert "отдых" in rest.lower() or "Выходной" in rest
+
+
+def test_evening_push_text():
+    from app.utils.constants import BRAND
+    from app.utils.push_copy import evening_push_text
+
+    class _H:
+        name = "Код"
+
+    habits = [{"habit": _H(), "done": True}, {"habit": _H(), "done": False}]
+    text = evening_push_text(user_id=1, habits=habits, day_key="2026-07-18")
+    assert BRAND in text
+    assert "✓" in text
+    assert "○" in text

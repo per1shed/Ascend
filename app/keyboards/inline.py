@@ -117,10 +117,15 @@ def settings_slots_kb(habits: list) -> InlineKeyboardMarkup:
 
 
 def evening_ok_kb() -> InlineKeyboardMarkup:
+    """Совместимость: одна кнопка «Понятно»."""
+    return push_ack_kb("evening")
+
+
+def push_ack_kb(kind: str = "morning") -> InlineKeyboardMarkup:
+    """kind: morning | evening"""
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="Ок", callback_data="evening:ok"),
-        InlineKeyboardButton(text="Пропустить", callback_data="evening:skip"),
+        InlineKeyboardButton(text="Понятно", callback_data=f"push:ack:{kind}")
     )
     return builder.as_markup()
 
