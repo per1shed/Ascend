@@ -93,8 +93,8 @@ async def settings_slot_pick(callback: CallbackQuery, state: FSMContext) -> None
 async def settings_time_action(callback: CallbackQuery, state: FSMContext) -> None:
     action = callback.data.split(":")[1]
     prompts = {
-        "morning": "Время утра HH:MM",
-        "evening": "Время вечера HH:MM",
+        "morning": "Время утреннего пуша HH:MM",
+        "evening": "Время вечернего пуша HH:MM",
     }
     await state.set_state(SettingsStates.waiting_value)
     await state.update_data(settings_action=action)

@@ -47,7 +47,7 @@ class SettingsService:
         goal = settings.north_star_goal or "не задана"
         return (
             "Настройки\n\n"
-            f"Утро: {settings.morning_time.strftime('%H:%M')}\n"
-            f"Вечер: {settings.evening_time.strftime('%H:%M')}\n"
+            f"Время утреннего пуша: {settings.morning_time.strftime('%H:%M')}\n"
+            f"Время вечернего пуша: {settings.evening_time.strftime('%H:%M')}\n"
             f"Цель: {goal}"
         )

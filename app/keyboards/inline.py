@@ -81,8 +81,8 @@ def rest_day_kb() -> InlineKeyboardMarkup:
 
 def settings_menu_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.row(InlineKeyboardButton(text="Время утра", callback_data="settings:morning"))
-    builder.row(InlineKeyboardButton(text="Время вечера", callback_data="settings:evening"))
+    builder.row(InlineKeyboardButton(text="Время утреннего пуша", callback_data="settings:morning"))
+    builder.row(InlineKeyboardButton(text="Время вечернего пуша", callback_data="settings:evening"))
     builder.row(InlineKeyboardButton(text="Цель", callback_data="settings:goal"))
     builder.row(InlineKeyboardButton(text="Направления", callback_data="settings:slots"))
     builder.row(InlineKeyboardButton(text="« Сегодня", callback_data="menu:today"))
